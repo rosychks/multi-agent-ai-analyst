@@ -19,7 +19,7 @@ export default function Home() {
   const [steps, setSteps] = useState([]);
   const [finalAnswer, setFinalAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
-  const abortRef = useRef(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
   async function handleAsk() {
