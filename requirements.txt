@@ -1,0 +1,13 @@
+python-dotenv
+langchain
+langchain-google-genai
+langgraph
+qdrant-client
+pypdf
+langchain-community
+langchain-text-splitters
+tavily-python
+pydantic
+langfuse
+fastapi
+uvicorn

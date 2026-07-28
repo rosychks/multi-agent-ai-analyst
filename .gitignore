@@ -1,0 +1,21 @@
+# Секреты — никогда не коммитим
+.env
+.env.local
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Qdrant локальные данные (если используется embedded-режим)
+qdrant_data/
+
+# Node / Next.js (у frontend есть свой .gitignore, но продублируем на всякий случай)
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# OS
+.DS_Store
+Thumbs.db
