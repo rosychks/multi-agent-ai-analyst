@@ -11,3 +11,4 @@ pydantic
 langfuse
 fastapi
 uvicorn
+langchain-openai
