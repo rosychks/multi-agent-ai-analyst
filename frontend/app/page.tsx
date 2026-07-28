@@ -17,7 +17,7 @@ const AGENT_LABELS = {
 export default function Home() {
   const [question, setQuestion] = useState("");
   const [steps, setSteps] = useState<any[]>([]);
-  const [finalAnswer, setFinalAnswer] = useState(null);
+  const [finalAnswer, setFinalAnswer] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
