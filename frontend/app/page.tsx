@@ -76,7 +76,7 @@ export default function Home() {
           }
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       setFinalAnswer({ answer: `Ошибка соединения: ${err.message}`, critic_ok: false });
     } finally {
       setLoading(false);
