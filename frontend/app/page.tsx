@@ -50,7 +50,7 @@ export default function Home() {
 
         buffer += decoder.decode(value, { stream: true });
         const events = buffer.split("\n\n");
-        buffer = events.pop();
+        buffer = events.pop() || "";
 
         for (const rawEvent of events) {
           if (!rawEvent.trim()) continue;
