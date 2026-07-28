@@ -40,7 +40,7 @@ export default function Home() {
         signal: controller.signal,
       });
 
-      const reader = response.body.getReader();
+      const reader = response.body!.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
 
