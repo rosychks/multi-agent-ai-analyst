@@ -1,7 +1,7 @@
 """
 F1 — Shared state: единый объект, который течёт через каждый узел графа.
 """
-from typing import TypedDict, List, Optional
+from typing import TypedDict, List, Optional, Dict, Any
 
 
 class AgentState(TypedDict):
@@ -22,6 +22,15 @@ class AgentState(TypedDict):
     critic_ok: Optional[bool]
     critic_reason: Optional[str]
 
+    # Насколько ответ подкреплён проверяемыми данными (0-100), а не
+    # общими знаниями модели. Заполняется критиком.
+    confidence: Optional[int]
+
+    # Полная история черновиков и вердиктов критика по ним — по одной
+    # записи на каждый проход draft_answer -> critic. Показывается на
+    # фронтенде как видимый цикл самопроверки, а не только финальный ответ.
+    draft_history: List[Dict[str, Any]]
+
 
 def new_state(question: str) -> AgentState:
     return AgentState(
@@ -37,6 +46,8 @@ def new_state(question: str) -> AgentState:
         answer=None,
         critic_ok=None,
         critic_reason=None,
+        confidence=None,
+        draft_history=[],
     )
 
 

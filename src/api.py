@@ -63,7 +63,19 @@ def stream_graph_events(question: str):
                         "answer": node_state.get("answer", ""),
                         "critic_ok": node_state.get("critic_ok"),
                         "revisions": node_state.get("revisions"),
+                        "confidence": node_state.get("confidence"),
                         "steps": node_state.get("steps", []),
+                        # Полная история черновиков + вердиктов критика —
+                        # показывает фронтенду весь цикл самопроверки.
+                        "draft_history": node_state.get("draft_history", []),
+                        # Структурированные доказательства — из чего реально
+                        # собран ответ, для блока "как я это проверил".
+                        "evidence": {
+                            "documents": node_state.get("documents", []),
+                            "web_result": node_state.get("web_result"),
+                            "sql_result": node_state.get("sql_result"),
+                            "code_result": node_state.get("code_result"),
+                        },
                     })
     except Exception as e:
         yield format_sse("error", {"message": str(e)})
