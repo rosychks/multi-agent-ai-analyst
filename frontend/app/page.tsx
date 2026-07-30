@@ -116,7 +116,7 @@ export default function Home() {
                 className="flex items-center gap-2 text-sm text-slate-300 bg-slate-900/50 rounded-lg px-4 py-2 border border-slate-800 animate-pulse"
                 style={{ animationIterationCount: i === steps.length - 1 && loading ? "infinite" : 1 }}
               >
-                <span>{AGENT_LABELS[node] || `⚙️ ${node}`}</span>
+                <span>{AGENT_LABELS[node as keyof typeof AGENT_LABELS] || `⚙️ ${node}`}</span>
               </div>
             ))}
           </div>
