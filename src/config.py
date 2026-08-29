@@ -3,9 +3,10 @@ F1 — Config: читает ключи из .env и создаёт готовы�
 клиенты (LLM, эмбеддинги, Qdrant). Все остальные модули импортируют
 объекты отсюда, а не читают .env заново.
 
-Вызовы к Gemini идут напрямую через официальный OpenAI-совместимый
-эндпоинт Google (а не через курсовой прокси) — так система не зависит
-от чужого сервиса, который может быть выключен или уснуть.
+Вызовы к Gemini идут через официальный коннектор langchain-google-genai
+(родной API Google), а не через OpenAI-совместимый прокси/эндпоинт —
+это надёжнее и полностью поддерживает структурированный вывод
+(with_structured_output), который используют supervisor и critic.
 """
 import os
 from dotenv import load_dotenv
@@ -27,24 +28,19 @@ if not GEMINI_API_KEY:
         "с https://aistudio.google.com/apikey)."
     )
 
-# Официальный OpenAI-совместимый эндпоинт Gemini API (Google), не прокси.
-PROXY_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
+from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmbeddings
 
-from langchain_openai import ChatOpenAI, OpenAIEmbeddings
-
-llm = ChatOpenAI(
-    base_url=PROXY_BASE_URL,
-    api_key=GEMINI_API_KEY,
+llm = ChatGoogleGenerativeAI(
     model="gemini-3.5-flash-lite",
+    google_api_key=GEMINI_API_KEY,
     temperature=0,
 )
 
 llm_strong = llm
 
-embeddings = OpenAIEmbeddings(
-    base_url=PROXY_BASE_URL,
-    api_key=GEMINI_API_KEY,
+embeddings = GoogleGenerativeAIEmbeddings(
     model="gemini-embedding-001",
+    google_api_key=GEMINI_API_KEY,
 )
 
 from qdrant_client import QdrantClient

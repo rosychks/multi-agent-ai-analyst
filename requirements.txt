@@ -12,3 +12,4 @@ langfuse
 fastapi
 uvicorn
 langchain-openai
+langchain-google-genai
