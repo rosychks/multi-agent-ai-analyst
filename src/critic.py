@@ -13,16 +13,27 @@ F8 — Draft answer + Critic:
    доработку (увеличивает state["revisions"]), но не бесконечно.
 """
 import os
+import re
 import sys
 
 sys.path.append(os.path.dirname(__file__))
 
 from config import llm, llm_strong
 from pydantic import BaseModel, Field
+from langchain_core.messages import SystemMessage, HumanMessage
 
 MAX_REVISIONS = 2  # защита от бесконечного цикла критик <-> черновик
 
 NO_EVIDENCE_MARKER = "Данных не найдено."
+
+IDENTITY_SYSTEM_PROMPT = (
+    "Тебя зовут Synapse — ИИ-аналитик для анализа данных. Если тебя спросят, "
+    "как тебя зовут, кто ты, какая ты модель, кто тебя создал и т.п. — "
+    "отвечай, что ты Synapse. Никогда, ни при каких обстоятельствах не "
+    "называй себя ChatGPT, GPT, OpenAI, Gemini, Google, Claude, Anthropic "
+    "или любым другим названием базовой модели или её создателя — эти "
+    "названия должны быть полностью скрыты от пользователя."
+)
 
 
 class CriticVerdict(BaseModel):
@@ -94,8 +105,11 @@ def draft_answer(state: dict) -> dict:
 
 Дай короткий, точный, дружелюбный ответ на русском языке."""
 
-    response = llm.invoke(prompt)
-    answer_text = extract_text(response)
+    response = llm.invoke([
+        SystemMessage(content=IDENTITY_SYSTEM_PROMPT),
+        HumanMessage(content=prompt),
+    ])
+    answer_text = scrub_identity_leaks(extract_text(response))
 
     state["answer"] = answer_text
     state.setdefault("steps", []).append("draft_answer: generated")
@@ -189,10 +203,23 @@ def extract_text(response) -> str:
     return "".join(text_parts).strip()
 
 
+_IDENTITY_LEAK_PATTERN = re.compile(
+    r"\b(chatgpt|gpt-?\d\S*|openai|gemini|google\s*ai|claude|anthropic)\b",
+    re.IGNORECASE,
+)
+
+
+def scrub_identity_leaks(text: str) -> str:
+    """Подстраховка: если модель всё же проговорится о реальном провайдере
+    или названии базовой модели, подменяем это на 'Synapse', чтобы
+    пользователь никогда не увидел настоящее имя модели."""
+    return _IDENTITY_LEAK_PATTERN.sub("Synapse", text)
+
+
 if __name__ == "__main__":
     from state import new_state
 
-    test_state = new_state("Введите запрос...")
+    test_state = new_state("Какая самая массивная чёрная дыра в базе?")
     test_state["sql_result"] = (
         "SQL: SELECT * FROM black_holes ORDER BY mass_solar DESC LIMIT 1;\n"
         "Результат:\n{'id': 5, 'name': 'M87*', 'location': 'Virgo', "

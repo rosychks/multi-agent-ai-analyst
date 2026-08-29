@@ -7,6 +7,7 @@ F13 (backend half) — FastAPI сервер, который стримит вы�
 import os
 import sys
 import json
+import traceback
 
 sys.path.append(os.path.dirname(__file__))
 sys.path.append(os.path.join(os.path.dirname(__file__), "agents"))
@@ -65,11 +66,7 @@ def stream_graph_events(question: str):
                         "revisions": node_state.get("revisions"),
                         "confidence": node_state.get("confidence"),
                         "steps": node_state.get("steps", []),
-                        # Полная история черновиков + вердиктов критика —
-                        # показывает фронтенду весь цикл самопроверки.
                         "draft_history": node_state.get("draft_history", []),
-                        # Структурированные доказательства — из чего реально
-                        # собран ответ, для блока "как я это проверил".
                         "evidence": {
                             "documents": node_state.get("documents", []),
                             "web_result": node_state.get("web_result"),
@@ -78,6 +75,13 @@ def stream_graph_events(question: str):
                         },
                     })
     except Exception as e:
+        # ВРЕМЕННО: печатаем полный traceback в лог сервера (виден в Render
+        # Logs), чтобы увидеть настоящую причину падения, а не только
+        # str(e) на фронтенде. Убрать print после диагностики, если не нужен
+        # постоянно — например, заменить на нормальный logging.
+        print("=== /ask FAILED ===", flush=True)
+        traceback.print_exc()
+        print("====================", flush=True)
         yield format_sse("error", {"message": str(e)})
 
 
