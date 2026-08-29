@@ -3,8 +3,9 @@ F1 — Config: читает ключи из .env и создаёт готовы�
 клиенты (LLM, эмбеддинги, Qdrant). Все остальные модули импортируют
 объекты отсюда, а не читают .env заново.
 
-Все вызовы к Gemini идут через курсовой прокси (OpenAI-совместимый API),
-а не напрямую в Google — это решает проблему с личными дневными лимитами.
+Вызовы к Gemini идут напрямую через официальный OpenAI-совместимый
+эндпоинт Google (а не через курсовой прокси) — так система не зависит
+от чужого сервиса, который может быть выключен или уснуть.
 """
 import os
 from dotenv import load_dotenv
@@ -22,17 +23,19 @@ LANGFUSE_HOST = os.getenv("LANGFUSE_HOST", "https://cloud.langfuse.com")
 if not GEMINI_API_KEY:
     raise RuntimeError(
         "GEMINI_API_KEY не найден. Проверьте, что файл .env лежит "
-        "в корне проекта и содержит GEMINI_API_KEY=... (курсовой прокси-ключ)."
+        "в корне проекта и содержит GEMINI_API_KEY=... (ваш личный ключ "
+        "с https://aistudio.google.com/apikey)."
     )
 
-PROXY_BASE_URL = "https://saidazam-litellm-proxy.hf.space/v1"
+# Официальный OpenAI-совместимый эндпоинт Gemini API (Google), не прокси.
+PROXY_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/"
 
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 llm = ChatOpenAI(
     base_url=PROXY_BASE_URL,
     api_key=GEMINI_API_KEY,
-    model="gemini-flash-lite",
+    model="gemini-3.5-flash-lite",
     temperature=0,
 )
 
@@ -41,7 +44,7 @@ llm_strong = llm
 embeddings = OpenAIEmbeddings(
     base_url=PROXY_BASE_URL,
     api_key=GEMINI_API_KEY,
-    model="gemini-embedding",
+    model="gemini-embedding-001",
 )
 
 from qdrant_client import QdrantClient
